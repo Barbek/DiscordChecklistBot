@@ -24,7 +24,7 @@
     "ansi-parser": "^3.2.10",
     "colormap": "^2.3.2",
     "discord-api-types": "0.36.2",
-    "discord.js": "^13.17.1",
+    "discord.js": "^14.25.1",
     "fs": "0.0.1-security",
     "moment": "^2.29.1"
   },

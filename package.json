@@ -1,0 +1,34 @@
+{
+  "name": "checklist",
+  "version": "1.2.1",
+  "description": "",
+  "main": "checklist.js",
+  "scripts": {
+    "start": "node checklist.js",
+    "generate-config": "node scripts/generate-config.js",
+    "deploy": "gh-pages -d . -s \"{README.md,checklist.js,package.json,package-lock.json,commands/**,functions/**,config/**}\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RagingRectangle/ChecklistBot.git"
+  },
+  "author": "RagingRectangle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RagingRectangle/ChecklistBot/issues"
+  },
+  "homepage": "https://barbek.github.io/DiscordChecklistBot",
+  "dependencies": {
+    "@discordjs/rest": "^2.6.1",
+    "ansi-parser": "^3.2.10",
+    "colormap": "^2.3.2",
+    "discord-api-types": "0.36.2",
+    "discord.js": "^13.17.1",
+    "fs": "0.0.1-security",
+    "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "gh-pages": "6.3.0"
+  }
+}

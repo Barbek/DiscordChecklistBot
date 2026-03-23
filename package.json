@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node checklist.js",
     "generate-config": "node scripts/generate-config.js",
-    "deploy": "gh-pages -d . -s \"{README.md,checklist.js,package.json,package-lock.json,commands/**,functions/**,config/**}\"",
+    "prepare-pages": "node scripts/prepare-pages.js",
+    "deploy": "npm run prepare-pages && gh-pages -d .deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

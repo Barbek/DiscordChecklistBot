@@ -18,13 +18,20 @@ const client = new Client({
    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 const fs = require('fs');
-const moment = require('moment');
+const path = require('path');
 const { loadConfig } = require('./functions/configLoader.js');
-const SlashRegistry = require('./functions/slashRegistry.js');
-const NewChecklist = require('./functions/newChecklist');
-const EditChecklist = require('./functions/editChecklist');
 
 let config = null;
+let SlashRegistry = null;
+let NewChecklist = null;
+let EditChecklist = null;
+
+function persistRuntimeConfig(runtimeConfig) {
+   const configDir = path.join(__dirname, 'config');
+   const configPath = path.join(configDir, 'config.json');
+   fs.mkdirSync(configDir, { recursive: true });
+   fs.writeFileSync(configPath, JSON.stringify(runtimeConfig, null, 3) + '\n', 'utf8');
+}
 
 client.on('ready', async () => {
    console.log("ChecklistBot Logged In");
@@ -121,6 +128,10 @@ client.on("warn", (e) => console.warn(e));
 async function initialize() {
    try {
       config = await loadConfig();
+      persistRuntimeConfig(config);
+      SlashRegistry = require('./functions/slashRegistry.js');
+      NewChecklist = require('./functions/newChecklist');
+      EditChecklist = require('./functions/editChecklist');
       console.log('Starting bot login...');
       await client.login(config.token);
    } catch (error) {

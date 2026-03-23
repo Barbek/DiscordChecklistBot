@@ -44,6 +44,12 @@ function fetchConfigFromGitHub() {
   return new Promise((resolve, reject) => {
     https
       .get(GITHUB_PAGES_URL, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`GitHub Pages returned HTTP ${res.statusCode}`));
+          res.resume();
+          return;
+        }
+
         let data = '';
         res.on('data', (chunk) => {
           data += chunk;

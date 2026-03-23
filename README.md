@@ -79,7 +79,7 @@ For secure deployment to GitHub Pages:
          - name: Generate config with secrets
            env:
              DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-             DISCORD_SERVER_ID: ${{ secrets.DISCORD_SERVER_ID }}
+             DISCORD_SERVER_ID: ${{ vars.DISCORD_SERVER_ID }}
              CHECKLIST_COMMAND: ${{ vars.CHECKLIST_COMMAND }}
            run: npm run generate-config
          

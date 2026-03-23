@@ -2,8 +2,10 @@ const {
 	EmbedBuilder,
 	SlashCommandBuilder
 } = require('discord.js');
-const config = require('../config/config.json');
+const { getConfig } = require('../functions/runtimeConfig.js');
 const NewChecklist = require('../functions/newChecklist.js');
+
+const config = getConfig();
 
 function formatDuration(durationMs) {
 	const totalSeconds = Math.floor(durationMs / 1000);

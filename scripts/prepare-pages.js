@@ -5,13 +5,7 @@ const rootDir = path.resolve(__dirname, '..');
 const publishDir = path.join(rootDir, '.deploy');
 
 const entriesToCopy = [
-  'README.md',
-  'checklist.js',
-  'package.json',
-  'package-lock.json',
-  'commands',
-  'functions',
-  'config'
+  'README.md'
 ];
 
 function copyEntry(relativePath) {

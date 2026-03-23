@@ -1,18 +1,15 @@
 /**
- * Config Loader with Secrets Registry Support
- * 1. Tries to load from local config/config.json first
- * 2. Falls back to fetching from GitHub Pages (secrets registry)
+ * Config loader
+ * 1. Starts from config.example defaults
+ * 2. Applies local config/config.json if present
+ * 3. Applies environment overrides
  */
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 
 const CONFIG_LOCAL_PATH = path.join(__dirname, '../config/config.json');
 const CONFIG_EXAMPLE_PATH = path.join(__dirname, '../config.example/config.json');
-
-// GitHub Pages URL where generated config is served
-const GITHUB_PAGES_URL = 'https://barbek.github.io/DiscordChecklistBot/config/config.json';
 
 function loadLocalConfig() {
   try {
@@ -40,63 +37,75 @@ function loadExampleConfig() {
   return null;
 }
 
-function fetchConfigFromGitHub() {
-  return new Promise((resolve, reject) => {
-    https
-      .get(GITHUB_PAGES_URL, (res) => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`GitHub Pages returned HTTP ${res.statusCode}`));
-          res.resume();
-          return;
-        }
+function parseGuildIds(raw) {
+  if (typeof raw !== 'string') {
+    return undefined;
+  }
 
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          try {
-            const config = JSON.parse(data);
-            console.log('✅ Loaded config from GitHub Pages (secrets registry)');
-            resolve(config);
-          } catch (error) {
-            reject(new Error('Invalid JSON from GitHub Pages: ' + error.message));
-          }
-        });
-      })
-      .on('error', reject);
-  });
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  if (trimmed.startsWith('[')) {
+    const parsed = JSON.parse(trimmed);
+    if (!Array.isArray(parsed)) {
+      throw new Error('DISCORD_SERVER_ID must be a JSON array or a comma-separated list.');
+    }
+
+    return parsed.map(String).map((id) => id.trim()).filter(Boolean);
+  }
+
+  return trimmed.split(',').map((id) => id.trim()).filter(Boolean);
+}
+
+function applyEnvironmentOverrides(config) {
+  const nextConfig = { ...config };
+
+  const token = process.env.DISCORD_TOKEN || process.env.CHECKLIST_BOT_TOKEN || process.env.DISCORD_BOT_TOKEN || process.env.TOKEN;
+  if (typeof token === 'string' && token.trim()) {
+    nextConfig.token = token.trim();
+  }
+
+  const slashGuildIdsRaw = process.env.DISCORD_SERVER_ID || process.env.CHECKLIST_SLASH_GUILD_IDS || process.env.SLASH_GUILD_IDS;
+  if (typeof slashGuildIdsRaw === 'string') {
+    nextConfig.slashGuildIDs = parseGuildIds(slashGuildIdsRaw);
+  }
+
+  const checklistCommand = process.env.CHECKLIST_COMMAND;
+  if (typeof checklistCommand === 'string' && checklistCommand.trim()) {
+    nextConfig.checklistCommand = checklistCommand.trim();
+  }
+
+  return nextConfig;
+}
+
+function normalizeConfig(config) {
+  const normalized = { ...config };
+  normalized.token = typeof normalized.token === 'string' ? normalized.token.trim() : '';
+  normalized.slashGuildIDs = Array.isArray(normalized.slashGuildIDs)
+    ? normalized.slashGuildIDs.map(String).map((id) => id.trim()).filter(Boolean)
+    : [];
+  normalized.checklistCommand = typeof normalized.checklistCommand === 'string' && normalized.checklistCommand.trim()
+    ? normalized.checklistCommand.trim()
+    : 'checklist';
+  return normalized;
 }
 
 async function loadConfig() {
-  // 1. Try local config first
-  let config = loadLocalConfig();
-  if (config) {
-    return config;
+  const exampleConfig = loadExampleConfig() || {};
+  const localConfig = loadLocalConfig() || {};
+  const config = normalizeConfig(applyEnvironmentOverrides({ ...exampleConfig, ...localConfig }));
+
+  if (!config.token) {
+    throw new Error('No Discord token configured. Set DISCORD_TOKEN or create config/config.json.');
   }
 
-  // 2. Try GitHub Pages (deployed config with secrets)
-  try {
-    console.log('📡 Fetching config from GitHub Pages...');
-    config = await fetchConfigFromGitHub();
-    return config;
-  } catch (error) {
-    console.warn('⚠️  Could not fetch from GitHub Pages:', error.message);
+  if (!config.slashGuildIDs.length) {
+    throw new Error('No slash guild IDs configured. Set DISCORD_SERVER_ID or add slashGuildIDs to config/config.json.');
   }
 
-  // 3. Fall back to example config
-  config = loadExampleConfig();
-  if (config) {
-    console.warn('⚠️  Using template config. Secrets will not work.');
-    console.warn('   Set DISCORD_TOKEN and DISCORD_SERVER_ID locally, or wait for deployment.');
-    return config;
-  }
-
-  // 4. No config available
-  throw new Error(
-    'No configuration found! Create config/config.json or set environment variables. ' +
-    'See config.example/config.json for template.'
-  );
+  return config;
 }
 
 module.exports = { loadConfig };

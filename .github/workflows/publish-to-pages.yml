@@ -9,13 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: github-pages
     permissions:
       contents: write
-    env:
-      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN || secrets.CHECKLIST_BOT_TOKEN || secrets.DISCORD_BOT_TOKEN || secrets.TOKEN }}
-      DISCORD_SERVER_ID: ${{ vars.DISCORD_SERVER_ID || secrets.DISCORD_SERVER_ID }}
-      CHECKLIST_COMMAND: ${{ vars.CHECKLIST_COMMAND }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,26 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
-      - name: Validate workflow inputs
-        run: |
-          if [ -z "$DISCORD_TOKEN" ]; then
-            echo "DISCORD_TOKEN is empty."
-            echo "Check repository/org secret names: DISCORD_TOKEN, CHECKLIST_BOT_TOKEN, DISCORD_BOT_TOKEN, TOKEN."
-            echo "If this is an Environment secret, attach the job to that environment."
-            exit 1
-          fi
-
-          if [ -z "$DISCORD_SERVER_ID" ]; then
-            echo "DISCORD_SERVER_ID is empty."
-            echo "Set it as repo variable DISCORD_SERVER_ID (preferred) or repo secret DISCORD_SERVER_ID."
-            exit 1
-          fi
-
-          echo "Inputs present. Token length: ${#DISCORD_TOKEN}; Guild string length: ${#DISCORD_SERVER_ID}"
-
-      - name: Generate config with secrets
-        run: npm run generate-config
 
       - name: Configure git author
         run: |

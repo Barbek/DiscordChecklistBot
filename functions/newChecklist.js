@@ -20,7 +20,6 @@ const {
 const colormap = require('colormap');
 const fs = require('fs');
 const moment = require('moment');
-const config = require('../config/config.json');
 const premades = require('../config/checklists.json');
 
 module.exports = {

@@ -17,21 +17,13 @@ const client = new Client({
    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
-const fs = require('fs');
-const path = require('path');
 const { loadConfig } = require('./functions/configLoader.js');
+const { setConfig } = require('./functions/runtimeConfig.js');
 
 let config = null;
 let SlashRegistry = null;
 let NewChecklist = null;
 let EditChecklist = null;
-
-function persistRuntimeConfig(runtimeConfig) {
-   const configDir = path.join(__dirname, 'config');
-   const configPath = path.join(configDir, 'config.json');
-   fs.mkdirSync(configDir, { recursive: true });
-   fs.writeFileSync(configPath, JSON.stringify(runtimeConfig, null, 3) + '\n', 'utf8');
-}
 
 client.on('ready', async () => {
    console.log("ChecklistBot Logged In");
@@ -128,7 +120,7 @@ client.on("warn", (e) => console.warn(e));
 async function initialize() {
    try {
       config = await loadConfig();
-      persistRuntimeConfig(config);
+   setConfig(config);
       SlashRegistry = require('./functions/slashRegistry.js');
       NewChecklist = require('./functions/newChecklist');
       EditChecklist = require('./functions/editChecklist');

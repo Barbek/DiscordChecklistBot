@@ -14,10 +14,11 @@ const {
 } = require('discord.js');
 
 const fs = require('fs');
-const config = require('../config/config.json');
+const { getConfig } = require('./runtimeConfig');
 
 module.exports = {
    registerCommands: async function registerCommands(client) {
+   const config = getConfig();
       var commands = [];
       const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
       var finalCommands = [];

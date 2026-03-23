@@ -19,10 +19,12 @@ const client = new Client({
 });
 const fs = require('fs');
 const moment = require('moment');
-const config = require('./config/config.json');
+const { loadConfig } = require('./functions/configLoader.js');
 const SlashRegistry = require('./functions/slashRegistry.js');
 const NewChecklist = require('./functions/newChecklist');
 const EditChecklist = require('./functions/editChecklist');
+
+let config = null;
 
 client.on('ready', async () => {
    console.log("ChecklistBot Logged In");
@@ -114,4 +116,17 @@ client.on('interactionCreate', async interaction => {
 
 client.on("error", (e) => console.error(e));
 client.on("warn", (e) => console.warn(e));
-client.login(config.token);
+
+// Initialize bot with config loading
+async function initialize() {
+   try {
+      config = await loadConfig();
+      console.log('Starting bot login...');
+      await client.login(config.token);
+   } catch (error) {
+      console.error('❌ Failed to initialize bot:', error.message);
+      process.exit(1);
+   }
+}
+
+initialize();

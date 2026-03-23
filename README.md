@@ -34,6 +34,77 @@ npm install
 - **token:** Discord bot token.
 - **slashGuildIDs:** List of guild IDs where commands should be registered.
 - **checklistCommand:** Name of slash command.
+
+### Configuration with Secrets Registry
+
+The bot uses a **secrets registry** approach to separate build time from secret injection:
+
+#### Local Development
+1. Copy the template: `cp -r config.example config`
+2. Edit `config/config.json` with your Discord token and server IDs
+3. Run the bot: `npm start`
+
+#### GitHub Actions Deployment
+For secure deployment to GitHub Pages:
+
+1. Set GitHub repository secrets and variables:
+   - **Secret** `DISCORD_TOKEN` - Your Discord bot token
+   - **Variable** `DISCORD_SERVER_ID` - Guild IDs (JSON array or comma-separated)
+   - **Variable** `CHECKLIST_COMMAND` - Slash command name
+
+2. Create a GitHub Actions workflow that:
+   - Has access to secrets/variables
+   - Runs `npm run generate-config` to inject secrets into `config/config.json`
+   - Runs `npm run deploy` to publish to GitHub Pages
+
+   **Example workflow (`.github/workflows/deploy.yml`):**
+   ```yaml
+   name: Deploy to GitHub Pages
+   on:
+     push:
+       branches: [deploy]
+   
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v3
+         - uses: actions/setup-node@v3
+           with:
+             node-version: 18
+         
+         - name: Install dependencies
+           run: npm install
+         
+         - name: Generate config with secrets
+           env:
+             DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+             DISCORD_SERVER_ID: ${{ secrets.DISCORD_SERVER_ID }}
+             CHECKLIST_COMMAND: ${{ vars.CHECKLIST_COMMAND }}
+           run: npm run generate-config
+         
+         - name: Deploy to GitHub Pages
+           run: npm run deploy
+   ```
+
+3. The generated `config/config.json` will be published as part of the GitHub Pages site.
+
+#### Runtime Config Loading
+The bot loads config in this order:
+1. **Local file** - `config/config.json` (if exists)
+2. **GitHub Pages** - Fetches from deployed secrets registry (fallback)
+3. **Template** - Uses `config.example/config.json` if neither above exists
+
+This allows the bot to:
+- ✅ Build locally without secrets
+- ✅ Fetch secrets from GitHub Pages when deployed
+- ✅ Use template values as defaults
+
+### Environment Variables (Optional for Local Development)
+- `DISCORD_TOKEN` (or fallbacks: `CHECKLIST_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, `TOKEN`)
+- `DISCORD_SERVER_ID` (or fallbacks: `CHECKLIST_SLASH_GUILD_IDS`, `SLASH_GUILD_IDS`) - JSON array `["123","456"]` or comma-separated `123,456`
+- `CHECKLIST_COMMAND`
+
  
   
 

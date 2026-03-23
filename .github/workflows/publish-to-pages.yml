@@ -18,6 +18,8 @@ jobs:
       CHECKLIST_COMMAND: ${{ vars.CHECKLIST_COMMAND }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: 24
@@ -49,6 +51,12 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure authenticated git remote
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
       - name: Deploy to GitHub Pages
         run: npm run deploy

@@ -5,7 +5,6 @@
   "main": "checklist.js",
   "scripts": {
     "start": "node checklist.js",
-    "build": "node scripts/build.js",
     "generate-config": "node scripts/generate-config.js",
     "deploy": "gh-pages -d . -s \"{README.md,checklist.js,package.json,package-lock.json,commands/**,functions/**,config/**}\"",
     "test": "echo \"Error: no test specified\" && exit 1"

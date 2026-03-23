@@ -96,7 +96,7 @@ The bot loads config in this order:
 3. **Template** - Uses `config.example/config.json` if neither above exists
 
 This allows the bot to:
-- ✅ Build locally without secrets
+- ✅ Run locally without CI/CD secrets
 - ✅ Fetch secrets from GitHub Pages when deployed
 - ✅ Use template values as defaults
 

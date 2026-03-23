@@ -20,7 +20,8 @@ const {
 const colormap = require('colormap');
 const fs = require('fs');
 const moment = require('moment');
-const premades = require('../config/checklists.json');
+const { loadPremades } = require('./premadesLoader');
+const premades = loadPremades();
 
 module.exports = {
    createCustomChecklist: async function createCustomChecklist(client, interaction, type) {
